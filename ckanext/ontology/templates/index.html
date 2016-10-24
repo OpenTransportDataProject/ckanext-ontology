@@ -1,0 +1,86 @@
+{% extends "page.html" %}
+
+    {% block title %}
+        {{ _('Ontologies') }} - {{ super() }}
+    {% endblock %}
+
+    {% block breadcrumb_content %}
+
+{% endblock %}
+
+{% block primary %}
+  <article class="module">
+    <div class="module-content">
+      <h1>{% trans %}Ontologies{% endtrans %}</h1>
+      {% if c.status %}
+        <div class="status">
+          <h3>{{ _('Status') }}:</h3>
+          {{ h.literal(c.status) }}
+        </div>
+      {% endif %}
+
+      <div id="new-ontology">
+          <a href="ontology/new">{% trans %}Add a ontology{% endtrans %}</a>
+      </div>
+
+      {% if c.ontologies %}
+        <div id="show-inactive-ontologies-content">
+          <label for="show-inactive-sources">Show inactive ontologies</label>
+          <input type="checkbox" id="show-inactive-sources" />
+        </div>
+
+        <table id="ontologies" class="table table-bordered table-condensed ${'publishers' if c.publisher_auth else ''}" >
+          <tr>
+            <th class="action">{{ _('View') }}</th>
+            <th class="action">{{ _('Edit') }}</th>
+            <th class="action">{{ _('Refresh')}}</th>
+            <th class="url">URL</th>
+            {# TRANSLATORS: Appears in ontology source table for the type of ontologies #}
+            <th>{{ _('Type')}}</th>
+            {# TRANSLATORS: Appears in ontology table 'is Active' #}
+            <th>{{ _('Active')}}</th>
+            <th>{{ _('Statistics') }}</th>
+            {# TRANSLATORS: Appears in ontology table 'date of next ontology #}
+            <th>{{ _('Next ontology') }}</th>
+            {# TRANSLATORS: Appears in ontology source table date created #}
+            <th>{{ _('Created') }}</th>
+          </tr>
+          {% set old_publisher = None %}
+          {% for ontology in c.ontologies %}
+            {% if c.publisher_auth and old_publisher != ontology['publisher_id'] %}
+              <tr class="publisher">
+                {% if ontology.get('publisher_title') %}
+                  <td colspan="9">{{ ontology['publisher_title'] }}</td>
+                {% else %}
+                  <td colspan="9">{{ ontology['publisher_id'] }}</td>
+                {% endif %}
+              </tr>
+            {% endif %}
+            {% set old_publisher =  ontology['publisher_id'] %}
+            <tr class="{{ 'active' if ontology.active else 'inactive' }}">
+              <td class="action"><a href="ontology/{{ ontology.id }}"><img src="ckanext/ontology/images/icons/ontology_view.png" alt="View" title="View" /></a></td>
+              <td class="action"><a href="ontology/edit/{{ ontology.id }}"><img src="ckanext/ontology/images/icons/ontology_edit.png" alt="Edit" title="Edit" /></a></td>
+              <td class="action"><a href="ontology/refresh/{{ ontology.id }}"><img src="ckanext/ontology/images/icons/ontology_refresh.png" alt="Refresh" title="Refresh" /></a></td>
+              <td title="{{ ontology.url }}">{{ ontology.url | truncate(50) }}</td>
+              <td>{{ ontology.type }}</td>
+              <td class="state">{{ ontology.active }}</td>
+              {% if 'msg' in ontology.status %}
+                <td>{{ ontology.status.msg }}</td>
+                <td>{{ ontology.status.msg }}</td>
+              {% else %}
+                <td>Datasets: <a href="ontology/{{ ontology.id }}#datasets">{{ ontology.status.overall_statistics.added }}</a><br/>
+                Last errors: <a href="ontology/{{ ontology.id }}#errors">{{ ontology.status.last_ontology_statistics.errors }}</a></td>
+                <td>{{ ontology.status.next_ontology }}</td>
+              {% endif %}
+              <td>{{ h.render_datetime(ontology.created) }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <div id="no-ontologies">{% trans %}No ontologies defined yet.{% endtrans %}</div>
+      {% endif %}
+    </div>
+  </article>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "ontology/admin_base.html" %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Ontologies'), named_route='{0}_search'.format(c.dataset_type)) }}</li>
+  <li class="active">{{ h.nav_link(_('Create ontology'), named_route='{0}_new'.format(c.dataset_type)) }}</li>
+{% endblock %}
+
+{% block actions_content %}{% endblock %}
+
+{% block subtitle %}{{ _('Create ontology') }}{% endblock %}
+
+{% block primary_content %}
+  <section class="module">
+    <div class="module-content">
+        {% if c.form %}
+          {# CKAN < 2.3 #}
+          {{ c.form | safe }}
+        {% else %}
+          {{- h.snippet(form_snippet, c=c, **form_vars) -}}
+        {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block secondary_content %}
+  <section class="module module-narrow">
+    <h2 class="module-heading"><i class="icon-large icon-info-sign"></i> {{ _('Ontologies') }}</h2>
+    <div class="module-content">
+      <p>
+        {% trans %}
+        Some information about what an ontology is and what it can be used for.
+        {% endtrans %}
+      </p>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{#
+Displays a single harvest ontology result.
+
+ontology         - A ontology to display.
+item_class     - The class name to use on the list item.
+hide_resources - If true hides the resources (default: false).
+banner         - If true displays a popular banner (default: false).
+truncate       - The length to trucate the description to (default: 180)
+truncate_title - The length to truncate the title to (default: 80).
+show_organization - Boolean on whether to show the related organization
+
+Example:
+
+  {% snippet 'snippets/ontology_item.html', ontology=c.ontology[0] %}
+
+#}
+{% set truncate = truncate or 180 %}
+{% set truncate_title = truncate_title or 80 %}
+{% set title = ontology.name %}
+{% set url = h.url_for('ontology_read', id=ontology.name) %}
+
+<li class="{{ item_class or "dataset-item" }}">
+  <div class="dataset-content">
+    <h3 class="dataset-heading">
+      {{ h.link_to(h.truncate(title, truncate_title), url) }}
+      {% if ontology.get(state, '').startswith('draft') %}
+        <span class="label label-info">{{ _('Draft') }}</span>
+      {% elif ontology.get(state, '').startswith('deleted') %}
+        <span class="label label-important">{{ _('Deleted') }}</span>
+      {% endif %}
+    </h3>
+
+    {% if ontology.notes %}
+      <p>{{ ontology.notes }}</p>
+    {% else %}
+      <p class="empty">{{ _('There is no description for this ontology') }}</p>
+    {% endif %}
+
+    <p class="muted">
+      {% if ontology.status %}
+        {{ _('Datasets') }}: {{ ontology.status.total_datasets }}
+      {% endif %}
+      {% if not within_organization and ontology.organization %}
+      &mdash; {{ _('Organization') }}: {{ h.link_to(ontology.organization.title or ontology.organization.name, h.url_for('organization_read', id=ontology.organization.name)) }}</a>
+      {% endif %}
+    </p>
+
+  </div>
+</li>

@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% if type == 'ontology' %}
+  {% set text_query = ungettext('{number} ontology found for "{query}"', '{number} ontologies found for "{query}"', count) %}
+  {% set text_query_none = _('Sorry no ontologies found for "{query}"') %}
+  {% set text_no_query = ungettext('{number} ontology found', '{number} ontologies found', count) %}
+  {% set text_no_query_none = _('Sorry no ontologies found') %}
+{%- endif -%}

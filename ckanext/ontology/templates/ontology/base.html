@@ -1,0 +1,9 @@
+{% extends "page.html" %}
+
+{% set ontology = c.pkg_dict or c.ontology %}
+
+{% set authorized_user = h.check_access('ontology_create') %}
+
+{% block subtitle %}{{ ontology.name }}{% endblock %}
+
+{% block breadcrumb_content_root_selected %} class="active"{% endblock %}

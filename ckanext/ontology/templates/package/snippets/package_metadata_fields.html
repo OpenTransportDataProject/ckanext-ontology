@@ -1,0 +1,36 @@
+{% ckan_extends %}
+
+{# You could remove 'free extras' from the package form like this, but we keep them for this example's tests.
+  {% block custom_fields %}
+  {% endblock %}
+#}
+
+{% block package_metadata_fields %}
+  {% set ontology_id = '' %}
+  <div class="control-group">
+    <label class="control-label" for="field-ontologies">{{ _("Ontology") }}</label>
+    <div class="controls">
+      <select id="field-ontologies" name="ontologies" data-module="autocomplete">
+        {% for ontologies in h.ontologies()  %}
+          {% set ontology_id = ontologies.id %}
+          <option value="{{ ontologies.id }}" {% if ontologies in data.get('ontologies', []) %}selected="selected"{% endif %}>{{ ontologies.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="field-nodes">{{ _("Node") }}</label>
+    <div class="controls">
+      <select id="field-nodes" name="nodes" data-module="autocomplete">
+          {% for nodes in h.nodes()  %}
+            {% if nodes.ontology_id != ontology_id %}
+              <option value="{{ nodes.id }}" {% if nodes in data.get('nodes', []) %}selected="selected"{% endif %}>{{ nodes.name }}</option>
+            {% endif %}
+          {% endfor %}
+      </select>
+    </div>
+    {{ontology_id}}
+  </div>
+  {{ super() }}
+
+{% endblock %}

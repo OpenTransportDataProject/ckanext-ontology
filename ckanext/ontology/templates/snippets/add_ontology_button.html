@@ -1,0 +1,6 @@
+{% if True %}
+  <a href="{{ h.url_for('{0}_new'.format(dataset_type)) }}" class="btn btn-primary">
+    <i class="icon-plus-sign-alt"></i>
+      {{ _('Add Ontology') }}
+  </a>
+{% endif %}

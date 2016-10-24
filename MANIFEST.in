@@ -1,0 +1,3 @@
+recursive-include ckanext/ontology/templates *
+recursive-include ckanext/ontology/fanstatic_library/styles *
+recursive-include ckanext/ontology/public *
