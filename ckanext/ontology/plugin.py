@@ -36,7 +36,16 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
             #add_ontology_to_tag_vocabulary(data_dict['name'])
 
         if 'type' in data_dict and data_dict['type'] == 'dataset' and not self.startup:
-            _create_dataset_ontology_relation(context, data_dict)
+            extras = data_dict['extras']
+            ontology_defined = False
+            node_defined = False
+            for e in extras:
+                if e['key'] == 'ontologies':
+                    ontology_defined = True
+                elif e['key'] == 'nodes':
+                    node_defined = True
+            if ontology_defined and node_defined:
+                _create_dataset_ontology_relation(context, data_dict)
 
     ## IActions
 
