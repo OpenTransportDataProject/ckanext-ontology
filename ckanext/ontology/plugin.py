@@ -18,6 +18,7 @@ DATASET_TYPE_NAME = "ontology"
 
 class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IRoutes,inherit=True)
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IDatasetForm)
     plugins.implements(plugins.IPackageController, inherit=True)
@@ -27,6 +28,56 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     plugins.implements(plugins.ITemplateHelpers)
 
     startup = False
+
+    ## IRoutes
+    def before_map(self, map):
+        map.connect('create_ontology',
+            '/dataset/ontology/add/{id}',
+    		controller='ckanext.ontology.controller:OntologyController',
+    		action='create_ontology'
+        )
+    	map.connect('dataset_edit_ontology',
+            '/dataset/ontology/edit/{id}',
+    		controller='ckanext.ontology.controller:OntologyController',
+            action='edit_ontology',
+            ckan_icon='edit'
+        )
+        # TODO
+        # Wait until update works
+        # map.connect('data dict button',
+        #     '/dataset/ontology/new_ontology/{id}',
+        # 	controller='ckanext.ontology.controller:OntologyController',
+        #     action="new_ontology"
+        # )
+    	map.connect('dataset_ontology',
+            '/dataset/ontology/{id}',
+        	controller='ckanext.ontology.controller:OntologyController',
+            action='show_ontology',
+            ckan_icon='info-sign'
+        )
+
+        return map
+
+    def after_map(self, map):
+        map.connect('create_ontology',
+            '/dataset/ontology/add/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='create_ontology'
+        )
+        map.connect('dataset_edit_ontology',
+            '/dataset/ontology/edit/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='edit_ontology',
+            ckan_icon='edit'
+        )
+        map.connect('dataset_ontology',
+            '/dataset/ontology/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='show_ontology',
+            ckan_icon='info-sign'
+        )
+
+        return map
 
     ## IPackageController
     def after_create(self, context, data_dict):
@@ -277,67 +328,3 @@ def getNodesFromGraph(graph):
 def ontology_list(context, data_dict):
     model = context["model"]
     api = context.get("api_version", 1)
-
-class DatasetFormPlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
-    plugins.implements(plugins.IDatasetForm)
-    plugins.implements(plugins.IConfigurer)
-    plugins.implements(plugins.ITemplateHelpers)
-
-    def _modify_package_schema(self, schema):
-        schema.update({
-            'custom_text': [toolkit.get_validator('ignore_missing'),
-                            toolkit.get_converter('convert_to_extras')]
-        })
-        schema.update({
-            'ontologies': [
-                toolkit.get_validator('ignore_missing'),
-                toolkit.get_converter('convert_to_extras')
-            ],
-            'nodes': [
-                toolkit.get_validator('ignore_missing'),
-                toolkit.get_converter('convert_to_extras')
-            ]
-        })
-        return schema
-
-    def create_package_schema(self):
-        schema = super(DatasetFormPlugin, self).create_package_schema()
-        schema = self._modify_package_schema(schema)
-        return schema
-
-    def update_package_schema(self):
-        schema = super(DatasetFormPlugin, self).update_package_schema()
-        schema = self._modify_package_schema(schema)
-        return schema
-
-    def show_package_schema(self):
-        schema = super(DatasetFormPlugin, self).show_package_schema()
-        schema.update({
-            'ontologies': [
-                toolkit.get_converter('convert_from_extras'),
-                toolkit.get_validator('ignore_missing')],
-            'nodes': [
-                toolkit.get_converter('convert_from_extras'),
-                toolkit.get_validator('ignore_missing')]
-        })
-
-        return schema
-
-    def is_fallback(self):
-        # Return True to register this plugin as the default handler for
-        # package types not handled by any other IDatasetForm plugin.
-        return True
-
-    def package_types(self):
-        # This plugin doesn't handle any special package types, it just
-        # registers itself as the default (above).
-        return []
-
-    def update_config(self, config):
-        # Add this plugin's templates dir to CKAN's extra_template_paths, so
-        # that CKAN will use this plugin's custom templates.
-        toolkit.add_template_directory(config, 'templates')
-
-    def get_helpers(self):
-        return {'ontologies': ontologies, 'nodes': nodes}
-
