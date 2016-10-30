@@ -173,6 +173,7 @@ def _create_ontology_object(context, data_dict):
 
     # Convert and store ontology in JSON format, and create NodeObjects for each node in the ontology
     if 'ontology' in data_dict and data_dict['ontology'] is not None:
+        source.ontology = data_dict['ontology']
         g = getGraph(dataString=data_dict['ontology'])
 
         # Convert to graph to JSON and store in 'json_ontology' field
@@ -180,10 +181,28 @@ def _create_ontology_object(context, data_dict):
 
         ns = getNodesFromGraph(g)
         for n in ns:
-            node_dict = {'id': None, 'URI':n[0], 'name':n[1], 'ontology_id':source.id}
+            uri = ''
+            name = ''
+            if n[1] is '':
+                if len(n[0].split('#')) > 1:
+                    split = n[0].split('#')
+                    uri = split[0]
+                    name = split[-1]
+                elif len(n[0].split('/')) > 1:
+                    split = n[0].split('/')
+                    uri = split[0]
+                    name = split[-1]
+                else:
+                    uri = split[0]
+                    name = split[-1]
+            else:
+                uri = n[0]
+                name = n[1]
+
+            node_dict = {'id': make_uuid(), 'URI': uri, 'name': name, 'ontology_id':source.id}
             _create_node_object(context, node_dict)
 
-    opt = ['name', 'description', 'ontology', 'created', 'type',
+    opt = ['name', 'description', 'created', 'type',
            'active', 'user_id']
     for o in opt:
         if o in data_dict and data_dict[o] is not None:
@@ -193,7 +212,7 @@ def _create_ontology_object(context, data_dict):
 
     # Don't commit yet, let package_create do it
     source.add()
-    log.info('Ontology source created: %s', source.id)
+    #log.info('Ontology source created: %s', source.id)
 
     return source
 
