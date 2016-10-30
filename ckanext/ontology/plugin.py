@@ -47,6 +47,10 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
             if ontology_defined and node_defined:
                 _create_dataset_ontology_relation(context, data_dict)
 
+    def before_index(self, pck_dict):
+        del pck_dict['ontology']
+        return pck_dict
+
     ## IActions
 
     def get_actions(self):
