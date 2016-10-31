@@ -58,6 +58,7 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
         return {
             'list_ontologies': ontology_get.get_ontology_objects,
             'get_ontology': ontology_get.get_ontology,
+            'list_json_ontologies': ontology_get.list_ontologies_json,
             'get_json_ontology': ontology_get.get_ontology_json,
             'list_nodes': ontology_get.get_node_objects,
             'get_node': ontology_get.get_node,
