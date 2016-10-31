@@ -148,7 +148,6 @@ def search_from_node(context, data_dict):
 def semantic_search(context, data_dict=None):
     datasets = []
 
-    # Identify the search term (data_dict['term']???)
     if 'term' not in data_dict:
         return None
 
@@ -204,7 +203,8 @@ def _datetime_converter(dt):
 def _find_nodes_from_term(term):
     nodes = []
     for node in NodeObject.get_all():
-        if term.lower() == node.name.lower():
+        # 'in' for partial match, '==' for exact match:
+        if term.lower() in node.name.lower():
             nodes.append(node)
 
     return nodes
