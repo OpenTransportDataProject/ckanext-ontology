@@ -7,6 +7,7 @@ import ckan.logic as logic
 import ckan.lib.base as base
 import ckan.lib.navl.dictization_functions as dict_fns
 import ckan.model as model
+from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation
 import ckan.lib.plugins
 import ckan.plugins as p
 import ckan.lib.render
@@ -36,14 +37,6 @@ lookup_package_plugin = ckan.lib.plugins.lookup_package_plugin
 
 class OntologyController(BaseController):
 
-    def finaldict(self, id, data=None, errors=None):
-        print "finaldict"
-        print id
-
-    def new_ontology(self, name):
-        print "NEW"
-        print id
-
     def edit_ontology(self, id):
         context = {
             'model': model,
@@ -58,7 +51,17 @@ class OntologyController(BaseController):
             # TODO ADD ONTOLOGIES TO SELECT
             # Add ontologies like this to use them
             # c.ontologies = [{'ontology': 'test', 'nodes': []},{'ontology': 'test', 'nodes': []}]
-            c.link = str("/dataset/ontology/new/" + id)
+            c.link = str("/dataset/ontology/add/" + id)
+            c.ontologies = []
+            c.nodes = NodeObject.get_all()
+            for ontology in OntologyObject.get_all():
+                ontology.nodes = []
+                for node in c.nodes:
+                    if ontology.as_dict()['id'] == node.as_dict()['ontology_id']:
+                        ontology.nodes.append(node)
+                c.ontologies.append(ontology)
+
+            print c.ontologies
             c.pkg_dict = get_action('package_show')(context, {'id': id})
             c.pkg = context['package']
         except NotFound:
@@ -93,3 +96,8 @@ class OntologyController(BaseController):
 
         return render('package/ontology_display.html', {'dataset_type': dataset_type})
 
+    def create_ontology(self, id, data=None):
+        print "CREATE"
+        print data
+        print id
+        return self.show_ontology(id)

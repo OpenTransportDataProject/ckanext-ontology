@@ -42,13 +42,6 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
             action='edit_ontology',
             ckan_icon='edit'
         )
-        # TODO
-        # Wait until update works
-        # map.connect('data dict button',
-        #     '/dataset/ontology/new_ontology/{id}',
-        # 	controller='ckanext.ontology.controller:OntologyController',
-        #     action="new_ontology"
-        # )
     	map.connect('dataset_ontology',
             '/dataset/ontology/{id}',
         	controller='ckanext.ontology.controller:OntologyController',
@@ -280,21 +273,6 @@ def _create_node_object(context, data_dict):
     log.info('Node object created: %r', node.id)
 
     return node
-
-def ontologies():
-    try:
-        #package_list = toolkit.get_action('package_list')
-        #ontologies = package_list(data_dict={'type': 'ontology'})
-
-        return OntologyObject.get_all()
-    except toolkit.ObjectNotFound:
-        return None
-
-def nodes():
-    try:
-        return NodeObject.get_all()
-    except toolkit.ObjectNotFound:
-        return None
 
 
 def getGraph(url=None, directoryLocation=None, dataString=None):

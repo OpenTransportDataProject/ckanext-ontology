@@ -4,7 +4,15 @@
 
 {% set action = form_action or h.url_for(c.link) %}
 
-<form id="resource-edit" class="dataset-form dataset-resource-form form-horizontal" method="post" action="{{ action }}" data-module="basic-form resource-form" enctype="multipart/form-data">
+<form
+    id="resource-edit"
+    class="dataset-form
+    dataset-resource-form form-horizontal"
+    method="post"
+    action="{{ action }}"
+    data-module="basic-form resource-form"
+    enctype="multipart/form-data"
+>
     {% block package_ontology_fields %}
         {% block stages %}
             {# An empty stages variable will not show the stages #}
@@ -16,8 +24,8 @@
         <div data-module="custom-fields">
 
             <div class="row-fluid" style="text-align:center;font-weight:bold;">
-                <div class="span3">Ontology</div>
-                <div class="span3">Node</div>
+                <div class="span6">Ontology</div>
+                <div class="span6">Node</div>
             </div>
 
             {%if c.dataset_ontologies%}
@@ -35,17 +43,32 @@
                 {% else %}
                     {% set ontology = {'ontology':'', 'node':''} %}
                 {%endif%}
+                {% set nodes = [] %}
 
                 <div class="control-group control-custom">
                     <div class="row-fluid">
-                        <div class="span3">
-                            <select class="span20" name="format_{{index}}">
-                                <option value=""></option>
+                        <div class="span6">
+                            <select id="format_{{index}}" name="format_{{index}}">
+                                <option value="" disabled selected>Select a ontology</option>
+                                {% for ontologies in c.ontologies  %}
+                                  {% set ontology_id = ontologies.id %}
+                                  <option
+                                          value="{{ ontologies.id }}"
+                                          {% if ontologies in data.get('ontologies', []) %}selected="selected"{% endif %}
+                                  >
+                                      {{ ontologies.name }}
+                                  </option>
+                                {% endfor %}
                             </select>
                         </div>
-                        <div class="span3">
-                            <select class="span20" name="format_{{index}}">
-                                <option value=""></option>
+                        <div class="span6">
+                            <select name="format_{{index}}" id="format_{{index}}">
+                                <option value="" disabled selected>Select a node</option>
+                                {% for nodes in nodes  %}
+                                    {% if nodes.ontology_id != ontology_id %}
+                                        <option value="{{ nodes.id }}" {% if nodes in data.get('nodes', []) %}selected="selected"{% endif %}>{{ nodes.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
                             </select>
                         </div>
                         <div class=""><input id="id-{{ index }}" type="hidden" name="id_{{ index }}" value="{{ontology['id']}}" /></div>
@@ -53,6 +76,7 @@
                 </div>
 
             {% endfor %}
+            <button class="btn btn-primary" name="save" value="go-dataset-complete" type="submit">{{ _('Save ontologies') }}</button>
         </div>
     {% endblock %}
 </form>

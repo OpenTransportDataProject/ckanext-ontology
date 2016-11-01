@@ -15,5 +15,15 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    {% snippet 'package/snippets/ontology_fields.html', data=None, errors=None, error_summary=error_summary, include_metadata=false, pkg_name=package_id, stage=hi, allow_upload=g.ofs_impl and logged_in, dataset_type=dataset_type %}
+    {% snippet
+        'package/snippets/ontology_fields.html',
+        data=None,
+        errors=None,
+        error_summary=error_summary,
+        include_metadata=false,
+        pkg_name=package_id,
+        stage=hi,
+        allow_upload=g.ofs_impl and logged_in,
+        dataset_type=dataset_type
+    %}
 {% endblock %}
