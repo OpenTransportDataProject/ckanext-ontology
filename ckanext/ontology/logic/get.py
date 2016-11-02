@@ -34,8 +34,7 @@ def get_ontology_objects(context, data_dict=None):
                 if data_dict[key] != o_dict[key]:
                     found = False
             if found:
-                o_dict['json'] = json.loads(o_dict['json'])
-                o_dict['json'] = o_dict['json'][1:-1]
+                o_dict['json'] = json.loads(o_dict['json'].decode('string-escape').strip('"'))
                 os_list.append(o_dict)
 
         return os_list
@@ -55,7 +54,7 @@ def get_ontology(context, data_dict=None):
     nodes_as_dicts = []
     for node in nodes:
         nodes_as_dicts.append(node.as_dict())
-    return {'ontology': ontology.as_simple_dict(), 'nodes': nodes_as_dicts}
+    return {'ontology': ontology.as_simple_dict(), 'json': json.loads(ontology.json.decode('string-escape').strip('"')), 'nodes': nodes_as_dicts}
 
 @toolkit.side_effect_free
 def list_ontologies_json(context, data_dict=None):
