@@ -19,7 +19,7 @@ def get_ontology_objects(context, data_dict=None):
                 o = o.as_dict()
                 o['json'] = json.loads(o['json'])
                 os_list.append(o)
-            return os_list
+            return json.loads(os_list)
 
         # If one or more search terms are specified, make sure they are valid
         for key in data_dict.keys():
@@ -38,7 +38,7 @@ def get_ontology_objects(context, data_dict=None):
             if found:
                 os_list.append(o_dict)
 
-        return os_list
+        return json.loads(os_list)
     except toolkit.ObjectNotFound:
         return None
 
