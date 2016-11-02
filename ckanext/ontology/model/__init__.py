@@ -92,14 +92,14 @@ class OntologyObject(OntologyDomainObject):
 
     def as_dict(self):
         return {'id': self.id, 'name': self.name, 'description': self.description,
-                'json_ontology':self.json_ontology, 'active': self.active}
+                 'active': self.active}
 
     def as_simple_dict(self):
         return {'id': self.id, 'name': self.name, 'description': self.description, 'active': self.active}
 
     def __repr__(self):
-        return '<OntologyObject id=%s name=%s description=%s json_ontology=%s active=%r>' % \
-               (self.id, self.name, self.description, self.json_ontology, self.active)
+        return '<OntologyObject id=%s name=%s description=%s active=%r>' % \
+               (self.id, self.name, self.description, self.active)
 
     def __str__(self):
         return self.__repr__().encode('ascii', 'ignore')
@@ -132,7 +132,6 @@ def define_ontology_tables():
         Column('id', types.UnicodeText, primary_key=True, default=make_uuid),
         Column('name', types.UnicodeText, default=u''),
         Column('description', types.UnicodeText, default=u''),
-        Column('json_ontology', types.TEXT),
         Column('created', types.DateTime, default=datetime.datetime.utcnow),
         Column('type', types.UnicodeText, nullable=False),
         Column('active', types.Boolean, default=True),

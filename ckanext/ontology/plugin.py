@@ -205,8 +205,6 @@ def _create_ontology_object(context, data_dict):
         g = getGraph(dataString=data_dict['ontology'])
 
         # Convert to graph to JSON and store in 'json_ontology' field
-        source.json_ontology = getJSONFromGraph(g)
-
         ns = getNodesFromGraph(g)
         for n in ns:
             uri = ''
