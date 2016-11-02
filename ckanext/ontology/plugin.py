@@ -4,6 +4,7 @@ from ckan.lib.plugins import DefaultDatasetForm
 import ckan.plugins.toolkit as toolkit
 from ckanext.ontology.model import setup as model_setup
 from ckanext.ontology.model import OntologyObject, NodeObject
+from ckan.model.types import make_uuid
 
 from rdflib import Graph
 import logging
