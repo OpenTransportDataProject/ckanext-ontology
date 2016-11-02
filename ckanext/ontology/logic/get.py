@@ -142,7 +142,7 @@ def _search_from_node(id):
         # for s, p, o...: s subclass of o
         subnode_uris = []
         for s, p, o in ontology:
-            if unicode('#subClassOf', 'utf8') in p and unicode(str(node.URI), 'utf8') == unicode(str(o), 'utf8'):
+            if unicode('#subClassOf', 'utf8') in unicode(p, 'utf8') and unicode(str(node.URI), 'utf8') == unicode(str(o), 'utf8'):
                 subnode_uris.append(unicode(str(s), 'utf8'))
 
         for n in NodeObject.get_all():
