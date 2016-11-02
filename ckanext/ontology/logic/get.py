@@ -64,16 +64,6 @@ def list_ontologies_json(context, data_dict=None):
     return json_list
 
 @toolkit.side_effect_free
-def list_ontologies_json(context, data_dict=None):
-    json_list = []
-    ontologies = OntologyObject.get_all()
-
-    for o in ontologies:
-        json_list.append(o.json_ontology)
-
-    return json_list
-
-@toolkit.side_effect_free
 def get_ontology_json(context, data_dict=None):
     if 'id' not in data_dict:
         return None
