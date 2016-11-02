@@ -8,10 +8,10 @@
             <td><b>Ontology</b></td>
             <td><b>Node</b></td>
 	    </tr>
-        {% for ontology in c.ontologies %}
+        {% for relation in c.ontologies %}
             <tr>
-                <td> {{ontology['ontology']}} </td>
-                <td> {{ontology['node']}} </td>
+                <td> {{relation['ontology']['name']}} </td>
+                <td> {{relation['node']['name']}} </td>
             </tr>
         {% endfor %}
     </table>

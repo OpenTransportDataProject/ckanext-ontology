@@ -3,15 +3,13 @@ import ckan.plugins as plugins
 from ckan.lib.plugins import DefaultDatasetForm
 import ckan.plugins.toolkit as toolkit
 from ckanext.ontology.model import setup as model_setup
-from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation
-from ckan.model.types import make_uuid
+from ckanext.ontology.model import OntologyObject, NodeObject
 
 from rdflib import Graph
 import logging
 import urllib2
 
 logging.basicConfig()
-
 log = getLogger(__name__)
 DATASET_TYPE_NAME = "ontology"
 
@@ -26,7 +24,6 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.IConfigurer, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
-
     startup = False
 
     ## IRoutes
@@ -77,22 +74,8 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
         if 'type' in data_dict and data_dict['type'] == DATASET_TYPE_NAME and not self.startup:
             # Create an actual Ontology object
             _create_ontology_object(context, data_dict)
-            #add_ontology_to_tag_vocabulary(data_dict['name'])
-
-        if 'type' in data_dict and data_dict['type'] == 'dataset' and not self.startup:
-            extras = data_dict['extras']
-            ontology_defined = False
-            node_defined = False
-            for e in extras:
-                if e['key'] == 'ontologies':
-                    ontology_defined = True
-                elif e['key'] == 'nodes':
-                    node_defined = True
-            if ontology_defined and node_defined:
-                _create_dataset_ontology_relation(context, data_dict)
 
     ## IActions
-
     def get_actions(self):
         from ckanext.ontology.logic import get as ontology_get
         return {
@@ -188,8 +171,7 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
 
     def update_config(self, config_):
         toolkit.add_template_directory(config_, 'templates')
-        toolkit.add_public_directory(config_, 'public')
-        toolkit.add_resource('fanstatic', 'ontology')
+        toolkit.add_resource('public', 'ontology')
 
 def _create_ontology_object(context, data_dict):
     '''
@@ -236,26 +218,6 @@ def _create_ontology_object(context, data_dict):
     log.info('Ontology source created: %s', source.id)
 
     return source
-
-def _create_dataset_ontology_relation(context, data_dict):
-    log.info('Creating a dataset-ontology relation: %r', data_dict)
-    relation = DatasetOntologyRelation()
-    relation.__setattr__('dataset_id', data_dict['id'])
-
-    # Add ontology and node IDs to relation
-    extras = data_dict['extras']
-
-    for e in extras:
-        # TODO Find a better  way to extract ontology_id and node_id
-        if e['key'] == 'ontologies':
-            relation.__setattr__('ontology_id', e['value'])
-        elif e['key'] == 'nodes':
-            relation.__setattr__('node_id', e['value'])
-
-    relation.add()
-    log.info('Created dataset-ontology relation: %r', data_dict)
-
-    return relation
 
 def _create_node_object(context, data_dict):
     log.info('Creating a dataset-ontology relation: %r', data_dict)
