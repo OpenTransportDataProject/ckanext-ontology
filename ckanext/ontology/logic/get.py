@@ -64,7 +64,6 @@ def list_ontologies_json(context, data_dict=None):
 
     return json_list
 
-
 @toolkit.side_effect_free
 def get_ontology_json(context, data_dict=None):
     if 'id' not in data_dict:
