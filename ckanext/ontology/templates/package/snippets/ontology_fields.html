@@ -38,11 +38,7 @@
                             <select id="ontology_{{index}}" name="ontology_{{index}}">
                                 <option value="" disabled selected>Select a ontology</option>
                                 {% for ontologies in c.ontologies  %}
-                                  {% set ontology_id = ontologies.id %}
-                                  <option
-                                          value="{{ ontologies.id }}"
-                                          {% if ontologies in data.get('ontologies', []) %}selected="selected"{% endif %}
-                                  >
+                                  <option value="{{ ontologies.id }}">
                                       {{ ontologies.name }}
                                   </option>
                                 {% endfor %}
