@@ -16,8 +16,9 @@ def get_ontology_objects(context, data_dict=None):
         # If no search terms are specified, return all ontologies
         if data_dict == None:
             for o in os:
+                o = o.as_dict()
                 o['json'] = json.loads(o['json'])
-                os_list.append(o.as_dict())
+                os_list.append(o)
             return os_list
 
         # If one or more search terms are specified, make sure they are valid
