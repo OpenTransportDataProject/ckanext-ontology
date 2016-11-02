@@ -3,21 +3,20 @@ import ckan.plugins as plugins
 from ckan.lib.plugins import DefaultDatasetForm
 import ckan.plugins.toolkit as toolkit
 from ckanext.ontology.model import setup as model_setup
-from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation
-from ckan.model.types import make_uuid
+from ckanext.ontology.model import OntologyObject, NodeObject
 
 from rdflib import Graph
 import logging
 import urllib2
 
 logging.basicConfig()
-
 log = getLogger(__name__)
 DATASET_TYPE_NAME = "ontology"
 
 
 class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IRoutes,inherit=True)
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IDatasetForm)
     plugins.implements(plugins.IPackageController, inherit=True)
@@ -25,34 +24,62 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.IConfigurer, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
-
     startup = False
+
+    ## IRoutes
+    def before_map(self, map):
+        map.connect('create_ontology',
+            '/dataset/ontology/add/{id}',
+    		controller='ckanext.ontology.controller:OntologyController',
+    		action='create_ontology'
+        )
+    	map.connect('dataset_edit_ontology',
+            '/dataset/ontology/edit/{id}',
+    		controller='ckanext.ontology.controller:OntologyController',
+            action='edit_ontology',
+            ckan_icon='edit'
+        )
+    	map.connect('dataset_ontology',
+            '/dataset/ontology/{id}',
+        	controller='ckanext.ontology.controller:OntologyController',
+            action='show_ontology',
+            ckan_icon='info-sign'
+        )
+
+        return map
+
+    def after_map(self, map):
+        map.connect('create_ontology',
+            '/dataset/ontology/add/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='create_ontology'
+        )
+        map.connect('dataset_edit_ontology',
+            '/dataset/ontology/edit/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='edit_ontology',
+            ckan_icon='edit'
+        )
+        map.connect('dataset_ontology',
+            '/dataset/ontology/{id}',
+            controller='ckanext.ontology.controller:OntologyController',
+            action='show_ontology',
+            ckan_icon='info-sign'
+        )
+
+        return map
 
     ## IPackageController
     def after_create(self, context, data_dict):
         if 'type' in data_dict and data_dict['type'] == DATASET_TYPE_NAME and not self.startup:
             # Create an actual Ontology object
             _create_ontology_object(context, data_dict)
-            #add_ontology_to_tag_vocabulary(data_dict['name'])
-
-        if 'type' in data_dict and data_dict['type'] == 'dataset' and not self.startup:
-            extras = data_dict['extras']
-            ontology_defined = False
-            node_defined = False
-            for e in extras:
-                if e['key'] == 'ontologies':
-                    ontology_defined = True
-                elif e['key'] == 'nodes':
-                    node_defined = True
-            if ontology_defined and node_defined:
-                _create_dataset_ontology_relation(context, data_dict)
 
     def before_index(self, pck_dict):
         del pck_dict['ontology']
         return pck_dict
 
     ## IActions
-
     def get_actions(self):
         from ckanext.ontology.logic import get as ontology_get
         return {
@@ -148,8 +175,7 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
 
     def update_config(self, config_):
         toolkit.add_template_directory(config_, 'templates')
-        toolkit.add_public_directory(config_, 'public')
-        toolkit.add_resource('fanstatic', 'ontology')
+        toolkit.add_resource('public', 'ontology')
 
 def _create_ontology_object(context, data_dict):
     '''
@@ -216,26 +242,6 @@ def _create_ontology_object(context, data_dict):
 
     return source
 
-def _create_dataset_ontology_relation(context, data_dict):
-    log.info('Creating a dataset-ontology relation: %r', data_dict)
-    relation = DatasetOntologyRelation()
-    relation.__setattr__('dataset_id', data_dict['id'])
-
-    # Add ontology and node IDs to relation
-    extras = data_dict['extras']
-
-    for e in extras:
-        # TODO Find a better  way to extract ontology_id and node_id
-        if e['key'] == 'ontologies':
-            relation.__setattr__('ontology_id', e['value'])
-        elif e['key'] == 'nodes':
-            relation.__setattr__('node_id', e['value'])
-
-    relation.add()
-    log.info('Created dataset-ontology relation: %r', data_dict)
-
-    return relation
-
 def _create_node_object(context, data_dict):
     log.info('Creating a dataset-ontology relation: %r', data_dict)
     node = NodeObject()
@@ -252,21 +258,6 @@ def _create_node_object(context, data_dict):
     log.info('Node object created: %r', node.id)
 
     return node
-
-def ontologies():
-    try:
-        #package_list = toolkit.get_action('package_list')
-        #ontologies = package_list(data_dict={'type': 'ontology'})
-
-        return OntologyObject.get_all()
-    except toolkit.ObjectNotFound:
-        return None
-
-def nodes():
-    try:
-        return NodeObject.get_all()
-    except toolkit.ObjectNotFound:
-        return None
 
 
 def getGraph(url=None, directoryLocation=None, dataString=None):
@@ -300,67 +291,3 @@ def getNodesFromGraph(graph):
 def ontology_list(context, data_dict):
     model = context["model"]
     api = context.get("api_version", 1)
-
-class DatasetFormPlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
-    plugins.implements(plugins.IDatasetForm)
-    plugins.implements(plugins.IConfigurer)
-    plugins.implements(plugins.ITemplateHelpers)
-
-    def _modify_package_schema(self, schema):
-        schema.update({
-            'custom_text': [toolkit.get_validator('ignore_missing'),
-                            toolkit.get_converter('convert_to_extras')]
-        })
-        schema.update({
-            'ontologies': [
-                toolkit.get_validator('ignore_missing'),
-                toolkit.get_converter('convert_to_extras')
-            ],
-            'nodes': [
-                toolkit.get_validator('ignore_missing'),
-                toolkit.get_converter('convert_to_extras')
-            ]
-        })
-        return schema
-
-    def create_package_schema(self):
-        schema = super(DatasetFormPlugin, self).create_package_schema()
-        schema = self._modify_package_schema(schema)
-        return schema
-
-    def update_package_schema(self):
-        schema = super(DatasetFormPlugin, self).update_package_schema()
-        schema = self._modify_package_schema(schema)
-        return schema
-
-    def show_package_schema(self):
-        schema = super(DatasetFormPlugin, self).show_package_schema()
-        schema.update({
-            'ontologies': [
-                toolkit.get_converter('convert_from_extras'),
-                toolkit.get_validator('ignore_missing')],
-            'nodes': [
-                toolkit.get_converter('convert_from_extras'),
-                toolkit.get_validator('ignore_missing')]
-        })
-
-        return schema
-
-    def is_fallback(self):
-        # Return True to register this plugin as the default handler for
-        # package types not handled by any other IDatasetForm plugin.
-        return True
-
-    def package_types(self):
-        # This plugin doesn't handle any special package types, it just
-        # registers itself as the default (above).
-        return []
-
-    def update_config(self, config):
-        # Add this plugin's templates dir to CKAN's extra_template_paths, so
-        # that CKAN will use this plugin's custom templates.
-        toolkit.add_template_directory(config, 'templates')
-
-    def get_helpers(self):
-        return {'ontologies': ontologies, 'nodes': nodes}
-

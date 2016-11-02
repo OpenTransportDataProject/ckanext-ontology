@@ -1,0 +1,68 @@
+{% import 'macros/form.html' as form %}
+{% set data = data or {} %}
+{% set errors = errors or {} %}
+
+{% set action = form_action or h.url_for(c.link) %}
+<form
+    id="resource-edit"
+    class="dataset-form dataset-resource-form form-horizontal"
+    method="post"
+    action="{{ action }}"
+    data-module="basic-form resource-form"
+    enctype="multipart/form-data"
+>
+    {% block package_ontology_fields %}
+        {% resource 'ontology/main' %}
+
+        <div>
+
+            <div class="row-fluid" style="text-align:center;font-weight:bold;">
+                <div class="span5">Ontology</div>
+                <div class="span5">Node</div>
+            </div>
+
+            {%if c.relations%}
+                {% set relations = c.relations %}
+                {% set relations = relations + [{}]%}
+            {%else%}
+                {%set relations = [{}]%}
+            {%endif%}
+
+            {% for relation in relations %}
+
+                {% set index = loop.index0 + (extras|count) %}
+
+                <div class="control-group control-custom" id='relations-container'>
+                    <div class="row-fluid" id="relation-row_{{index}}" data-module-value="{{ relation }}" data-module="ontology_select" data-module-relation="relation-row_{{index}}" data-module-delete="delete_{{index}}" data-module-ontology="ontology_{{index}}" data-module-node="node_{{index}}" data-module-ontologies="{{c.ontologiesJson}}">
+                        <div class="span5">
+                            <select id="ontology_{{index}}" name="ontology_{{index}}">
+                                <option value="" disabled selected>Select a ontology</option>
+                                {% for ontologies in c.ontologies  %}
+                                  {% set ontology_id = ontologies.id %}
+                                  <option
+                                          value="{{ ontologies.id }}"
+                                          {% if ontologies in data.get('ontologies', []) %}selected="selected"{% endif %}
+                                  >
+                                      {{ ontologies.name }}
+                                  </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="span5">
+                            <select name="node_{{index}}" id="node_{{index}}">
+                                <option value="" disabled selected>Select a node</option>
+                            </select>
+                        </div>
+                        <div class="span2">
+                            <label class="checkbox" for="delete_{{index}}">
+                              <input type="checkbox" id="delete_{{index}}" /> <span>{{ _('Remove') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">{{ _('Save ontologies') }}</button>
+        </div>
+    {% endblock %}
+</form>

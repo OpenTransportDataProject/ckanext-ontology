@@ -1,0 +1,22 @@
+{% extends "package/read_base.html" %}
+{% import 'macros/form.html' as form %}
+
+{% block primary_content_inner %}
+  {% if c.ontologies %}
+    <table style="width:100%">
+        <tr>
+            <td><b>Ontology</b></td>
+            <td><b>Node</b></td>
+	    </tr>
+        {% for relation in c.ontologies %}
+            <tr>
+                <td> {{relation['ontology']['name']}} </td>
+                <td> {{relation['node']['name']}} </td>
+            </tr>
+        {% endfor %}
+    </table>
+  {% else %}
+    <p class="empty">{{ _('There is no ontologies associated with this dataset') }}</p>
+  {% endif %}
+
+{% endblock %}

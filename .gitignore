@@ -1,3 +1,4 @@
+build/
 sdist/
 *.egg-info/
 .installed.cfg
