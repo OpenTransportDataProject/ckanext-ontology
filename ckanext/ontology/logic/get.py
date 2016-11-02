@@ -34,7 +34,8 @@ def get_ontology_objects(context, data_dict=None):
                 if data_dict[key] != o_dict[key]:
                     found = False
             if found:
-                o_dict['jsonData'] = json.loads(o_dict['json'])
+                o_dict['json'] = json.loads(o_dict['json'])
+                o_dict['json'] = o_dict['json'][1:-1]
                 os_list.append(o_dict)
 
         return os_list
