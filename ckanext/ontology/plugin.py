@@ -200,6 +200,7 @@ def _create_ontology_object(context, data_dict):
     # Convert and store ontology in JSON format, and create NodeObjects for each node in the ontology
     if 'ontology' in data_dict and data_dict['ontology'] is not None:
         g = getGraph(dataString=data_dict['ontology'])
+        source.ontology = data_dict['ontology']
         source.json = json.dumps(getJSONFromGraph(g))
 
         ns = getNodesFromGraph(g)
