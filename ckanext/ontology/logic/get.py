@@ -16,7 +16,7 @@ def get_ontology_objects(context, data_dict=None):
         # If no search terms are specified, return all ontologies
         if data_dict == None:
             for o in os:
-                os_list.append(o.as_simple_dict())
+                os_list.append(o.as_dict())
             return os_list
 
         # If one or more search terms are specified, make sure they are valid
@@ -28,12 +28,12 @@ def get_ontology_objects(context, data_dict=None):
         # Find all ontologies matching the search terms
         for o in os:
             found = True
-            o_dict = o.as_simple_dict()
+            o_dict = o.as_dict()
             for key in data_dict.keys():
                 if data_dict[key] != o_dict[key]:
                     found = False
             if found:
-                os_list.append(o.as_simple_dict())
+                os_list.append(o.as_dict())
 
         return os_list
     except toolkit.ObjectNotFound:
