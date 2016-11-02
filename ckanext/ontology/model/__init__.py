@@ -98,11 +98,11 @@ class OntologyObject(OntologyDomainObject):
         return {'id': self.id, 'name': self.name, 'description': self.description, 'active': self.active}
 
     def __repr__(self):
-        return '<OntologyObject id=%s name=%s description=%s ontology=%s json_ontology=%s active=%r>' % \
-               (self.id, self.name, self.description, self.ontology, self.json_ontology, self.active)
+        return '<OntologyObject id=%s name=%s description=%s json_ontology=%s active=%r>' % \
+               (self.id, self.name, self.description, self.json_ontology, self.active)
 
     def __str__(self):
-        return self.__repr__().encode('utf8', 'ignore')
+        return self.__repr__().encode('ascii', 'ignore')
 
 class NodeObject(OntologyDomainObject):
     def __repr__(self):
