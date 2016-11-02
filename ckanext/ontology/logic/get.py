@@ -1,4 +1,5 @@
 import logging
+import json
 from ckan.plugins import toolkit
 from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation
 from ckan.model import Package
@@ -59,7 +60,7 @@ def list_ontologies_json(context, data_dict=None):
     ontologies = OntologyObject.get_all()
 
     for o in ontologies:
-        json_list.append(o.json_ontology)
+        json_list.append(json.load(o.json_ontology))
 
     return json_list
 
@@ -69,7 +70,7 @@ def get_ontology_json(context, data_dict=None):
         return None
 
     ontology = OntologyObject.get(key=data_dict['id'])
-    return ontology.json_ontology
+    return json.loads(ontology.json_ontology)
 
 @toolkit.side_effect_free
 def dataset_node_relations(context, data_dict=None):
