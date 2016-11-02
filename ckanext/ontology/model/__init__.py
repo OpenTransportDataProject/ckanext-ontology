@@ -102,7 +102,7 @@ class OntologyObject(OntologyDomainObject):
                (self.id, self.name, self.description, self.ontology, self.json_ontology, self.active)
 
     def __str__(self):
-        return self.__repr__().encode('ascii', 'ignore')
+        return self.__repr__().encode('utf-8', 'ignore')
 
 class NodeObject(OntologyDomainObject):
     def __repr__(self):
