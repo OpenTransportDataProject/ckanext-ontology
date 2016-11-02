@@ -36,7 +36,7 @@ def get_ontology_objects(context, data_dict=None):
                 if data_dict[key] != o_dict[key]:
                     found = False
             if found:
-                os_list.append(o.as_dict())
+                os_list.append(o_dict)
 
         return os_list
     except toolkit.ObjectNotFound:
