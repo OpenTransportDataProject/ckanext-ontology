@@ -85,8 +85,10 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
         return {
             'list_ontologies': ontology_get.get_ontology_objects,
             'get_ontology': ontology_get.get_ontology,
-            'get_ontology_json': ontology_get.get_ontology_json,
-            'list_ontologies': ontology_get.get_node_objects,
+            'list_json_ontologies': ontology_get.list_ontologies_json,
+            'get_json_ontology': ontology_get.get_ontology_json,
+            'dataset_ontologies': ontology_get.dataset_node_relations,
+            'list_nodes': ontology_get.get_node_objects,
             'get_node': ontology_get.get_node,
             'search_from_node': ontology_get.search_from_node,
             'semantic_search': ontology_get.semantic_search

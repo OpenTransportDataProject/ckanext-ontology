@@ -54,12 +54,44 @@ def get_ontology(context, data_dict=None):
     return {'ontology': ontology.as_simple_dict(), 'nodes': nodes_as_dicts}
 
 @toolkit.side_effect_free
+def list_ontologies_json(context, data_dict=None):
+    json_list = []
+    ontologies = OntologyObject.get_all()
+
+    for o in ontologies:
+        json_list.append(o.json_ontology)
+
+    return json_list
+
+@toolkit.side_effect_free
+def list_ontologies_json(context, data_dict=None):
+    json_list = []
+    ontologies = OntologyObject.get_all()
+
+    for o in ontologies:
+        json_list.append(o.json_ontology)
+
+    return json_list
+
+@toolkit.side_effect_free
 def get_ontology_json(context, data_dict=None):
     if 'id' not in data_dict:
         return None
 
     ontology = OntologyObject.get(key=data_dict['id'])
     return ontology.json_ontology
+
+@toolkit.side_effect_free
+def dataset_node_relations(context, data_dict=None):
+    if 'id' not in data_dict:
+        return None
+
+    dataset_relations = DatasetOntologyRelation.get_all()
+    dict_list = []
+    for rel in dataset_relations:
+        if rel.dataset_id == data_dict['id']:
+            dict_list.append(rel.as_dict())
+    return dict_list
 
 # Return a list of all NodeObjects, with possibility to filter by ontology id (with ?id=...)
 @toolkit.side_effect_free
@@ -138,7 +170,6 @@ def search_from_node(context, data_dict):
 def semantic_search(context, data_dict=None):
     datasets = []
 
-    # Identify the search term (data_dict['term']???)
     if 'term' not in data_dict:
         return None
 
@@ -194,7 +225,8 @@ def _datetime_converter(dt):
 def _find_nodes_from_term(term):
     nodes = []
     for node in NodeObject.get_all():
-        if term.lower() == node.name.lower():
+        # 'in' for partial match, '==' for exact match:
+        if term.lower() in node.name.lower():
             nodes.append(node)
 
     return nodes
