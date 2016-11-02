@@ -76,10 +76,6 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
             # Create an actual Ontology object
             _create_ontology_object(context, data_dict)
 
-    def before_index(self, pck_dict):
-        del pck_dict['ontology']
-        return pck_dict
-
     ## IActions
     def get_actions(self):
         from ckanext.ontology.logic import get as ontology_get
