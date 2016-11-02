@@ -132,7 +132,7 @@ def define_ontology_tables():
         Column('id', types.UnicodeText, primary_key=True, default=make_uuid),
         Column('name', types.UnicodeText, default=u''),
         Column('description', types.UnicodeText, default=u''),
-        Column('json_ontology', types.JSON),
+        Column('json_ontology', types.TEXT),
         Column('created', types.DateTime, default=datetime.datetime.utcnow),
         Column('type', types.UnicodeText, nullable=False),
         Column('active', types.Boolean, default=True),
