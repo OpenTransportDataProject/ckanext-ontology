@@ -83,7 +83,10 @@ def dataset_node_relations(context, data_dict=None):
     dict_list = []
     for rel in dataset_relations:
         if rel.dataset_id == data_dict['id']:
-            dict_list.append(rel.as_dict())
+            relation = rel.as_dict()
+            node = NodeObject.get(key=rel.node_id, attr='id').as_dict()
+            dict_list.append( {'id': rel.id, 'dataset_id': rel.dataset_id, 'ontology_id': rel.ontology_id,
+                               'node': node} )
     return dict_list
 
 # Return a list of all NodeObjects, with possibility to filter by ontology id (with ?id=...)
@@ -142,12 +145,6 @@ def _search_from_node(id):
         # for s, p, o...: s subclass of o
         subnode_uris = []
         for s, p, o in ontology:
-            def unicode_value(value):
-                try:
-                    return unicode(value, 'utf-8')
-                except TypeError:
-                    return value
-
             if unicode_value('#subClassOf') in unicode_value(p) and unicode_value(node.URI) == unicode_value(o):
                 subnode_uris.append(unicode_value(s))
 
@@ -230,3 +227,10 @@ def _find_nodes_from_term(term):
             nodes.append(node)
 
     return nodes
+
+
+def unicode_value(value):
+    try:
+        return unicode(value, 'utf-8')
+    except TypeError:
+        return value
