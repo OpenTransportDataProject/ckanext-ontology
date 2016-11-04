@@ -34,7 +34,8 @@ def get_ontology_objects(context, data_dict=None):
                 if data_dict[key] != o_dict[key]:
                     found = False
             if found:
-                o_dict['json'] = json.loads(o_dict['json'].decode('string-escape').strip('"'))
+                json_data = json.loads(o_dict['json'].decode('unicode-escape').strip('"'))
+                o_dict['json'] = json_data
                 os_list.append(o_dict)
 
         return os_list
@@ -139,7 +140,7 @@ def _search_from_node(id):
             if (d.node_id == node.id):
                 package_dict = _package_as_dict(Package.get(d.dataset_id))
                 package_dict['found_in_ontology_id'] = d.ontology_id
-                package_dict['found_in_node_id'] = d.node_id
+                package_dict['found_in_node'] = NodeObject.get(d.node_id).as_dict()
                 datasets.append(package_dict)
         # find children of 'node'. Add to 'nodes[]'.
         # for s, p, o...: s subclass of o
