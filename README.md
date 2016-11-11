@@ -1,6 +1,6 @@
 # ckanext-ontology
 
-This is an extension of CKAN which brings ontology functionality into CKAN.
+This is an extension which brings ontology functionality into CKAN.
 
 
 
