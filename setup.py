@@ -20,8 +20,8 @@ setup(
     description='''Extension for adding and cataloguing ontologies''',
     long_description=long_description,
 
-    # The project's main homepage.
-    url='https://github.com/larseen/ckanext-ontology',
+    # The project's main homepage. Updated to refer to project main page
+    url='https://github.com/OpenTransportDataProject/ckanext-ontology',
 
     # Author details
     author='''Kristoffer Larsen''',
