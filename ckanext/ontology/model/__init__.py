@@ -18,18 +18,23 @@ log = logging.getLogger(__name__)
 __all__ = [
     'OntologyObject', 'ontology_table',
     'NodeObject', 'node_table',
-    'DatasetOntologyRelation', 'dataset_ontology_relation_table'
+    'DatasetOntologyRelation', 'dataset_ontology_relation_table',
+    'SemanticSearchResults', 'semantic_search_results_table'
 ]
 #Ontology = 'ontology_table'
 ontology_table = None
 node_table = None
 dataset_ontology_relation_table = None
-
+semantic_search_results_table = None
 
 def setup():
     if ontology_table is None:
         define_ontology_tables()
         log.debug('Ontology tables defined in memory')
+
+    if semantic_search_results_table is None:
+        define_semantic_search_results_table()
+        log.debug('Semantic search tables defined in memory')
 
     if not model.package_table.exists():
         log.debug('Ontology table creation deferred')
@@ -45,6 +50,14 @@ def setup():
         log.debug('Ontology tables created')
     else:
         log.debug('Ontology tables already exist')
+
+    if not semantic_search_results_table.exists():
+        log.debug('Creating semantic_search_results_table...')
+        semantic_search_results_table.create()
+        log.debug('semantic_search_results_table created')
+    else:
+        log.debug('semantic_search_results_table already exists')
+
 
 
 class OntologyError(Exception):
@@ -106,7 +119,8 @@ class OntologyObject(OntologyDomainObject):
 
 class NodeObject(OntologyDomainObject):
     def __repr__(self):
-        return '<DatasetOntologyRelation id=%s URI=%s ontology_id=%s name=%r>' % \
+        #return '<DatasetOntologyRelation id=%s URI=%s ontology_id=%s name=%r>' % \
+        return '<NodeObject id=%s URI=%s ontology_id=%s name=%r>' % \
                (self.id, self.URI, self.ontology_id, self.name)
 
     def __str__(self):
@@ -167,4 +181,28 @@ def define_ontology_tables():
     mapper(
         DatasetOntologyRelation,
         dataset_ontology_relation_table,
+    )
+
+class SemanticSearchResults(OntologyDomainObject):
+    def __repr__(self):
+        return '<SemanticSearchResults id=%s terms=%s results=%s timestamp=%r>' % \
+               (self.id, self.terms, self.results, self.timestamp)
+
+    def __str__(self):
+        return self.__repr__().encode('ascii', 'ignore')
+
+
+def define_semantic_search_results_table():
+    global semantic_search_results_table
+
+    semantic_search_results_table = Table('semantic_search_results', metadata,
+       Column('id', types.UnicodeText, primary_key=True, default=make_uuid),
+       Column('timestamp', types.DateTime, default=datetime.datetime.utcnow),
+       Column('terms', types.UnicodeText, default=u''),
+       Column('results', types.UnicodeText, default=u'')
+    )
+
+    mapper(
+        SemanticSearchResults,
+        semantic_search_results_table
     )

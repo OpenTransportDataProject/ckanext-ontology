@@ -1,8 +1,10 @@
 import logging
 import json
+import datetime
 from ckan.plugins import toolkit
-from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation
+from ckanext.ontology.model import OntologyObject, NodeObject, DatasetOntologyRelation, SemanticSearchResults
 from ckan.model import Package
+from ckan.model.types import make_uuid
 
 log = logging.getLogger(__name__)
 
@@ -190,6 +192,9 @@ def semantic_search(context, data_dict=None):
             if f not in datasets:
                 datasets.append(f)
 
+    # write the results (datasets) to the SemanticSearchResults Table
+    _create_semantic_search_result_object(datasets, data_dict['term'])
+
     return datasets
 
     # Find datasets belonging the each node and their subtrees. Avoid duplicates!!!
@@ -203,7 +208,8 @@ def _get_ontology_graph(id):
 
 def _package_as_dict(pkg):
     from datetime import datetime
-    return {'id': pkg.id, 'name': pkg.name, 'title': pkg.title, 'version': pkg.version, 'url': pkg.url,
+    return {'id': pkg.id, 'name': pkg    #log.debug('ckanext/ontology/logic/get.py: Creating a semantic search result object: %r terms: %s', datasets, terms)
+.name, 'title': pkg.title, 'version': pkg.version, 'url': pkg.url,
             'notes': pkg.notes, 'license_id': pkg.license_id, 'revision_id': pkg.revision_id,
             'author': pkg.author, 'author_email': pkg.author_email, 'maintainer': pkg.maintainer,
             'maintainer_email': pkg.maintainer_email, 'state': pkg.state, 'type': pkg.type,
@@ -235,3 +241,26 @@ def unicode_value(value):
         return unicode(value, 'utf-8')
     except TypeError:
         return value
+
+def _create_semantic_search_result_object(datasets, terms):
+    # convert result datasets to results_str
+    results = []
+    for dataset in datasets:
+        r_id = dataset.get("id")
+        #ont_id = dataset.get("found_in_ontology_id")
+        node_name = dataset.get("found_in_node").get("name")
+        #log.debug('The result dataset: %s, node: %s', r_id, node_name)
+        results.append(r_id + ":" + node_name)
+
+    results_str = ";".join(results)
+
+    # add the semantic search result to database table
+    result = SemanticSearchResults()
+    result.id = make_uuid()
+    result.timestamp = datetime.datetime.utcnow()
+    result.terms = terms
+    result.results = results_str
+    log.debug('The semanticSearchResultObject is: %s', result.__str__())
+    result.save()
+    log.debug('SemanticSearchResult object is added to the table' )
+    return result
