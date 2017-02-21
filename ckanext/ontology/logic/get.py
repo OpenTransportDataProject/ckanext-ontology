@@ -208,8 +208,7 @@ def _get_ontology_graph(id):
 
 def _package_as_dict(pkg):
     from datetime import datetime
-    return {'id': pkg.id, 'name': pkg    #log.debug('ckanext/ontology/logic/get.py: Creating a semantic search result object: %r terms: %s', datasets, terms)
-.name, 'title': pkg.title, 'version': pkg.version, 'url': pkg.url,
+    return {'id': pkg.id, 'name': pkg.name, 'title': pkg.title, 'version': pkg.version, 'url': pkg.url,
             'notes': pkg.notes, 'license_id': pkg.license_id, 'revision_id': pkg.revision_id,
             'author': pkg.author, 'author_email': pkg.author_email, 'maintainer': pkg.maintainer,
             'maintainer_email': pkg.maintainer_email, 'state': pkg.state, 'type': pkg.type,
@@ -249,7 +248,6 @@ def _create_semantic_search_result_object(datasets, terms):
         r_id = dataset.get("id")
         #ont_id = dataset.get("found_in_ontology_id")
         node_name = dataset.get("found_in_node").get("name")
-        #log.debug('The result dataset: %s, node: %s', r_id, node_name)
         results.append(r_id + ":" + node_name)
 
     results_str = ";".join(results)
