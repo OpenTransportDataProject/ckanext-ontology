@@ -144,17 +144,29 @@ def _search_from_node(id):
                 package_dict['found_in_ontology_id'] = d.ontology_id
                 package_dict['found_in_node'] = NodeObject.get(d.node_id).as_dict()
                 datasets.append(package_dict)
-        # find children of 'node'. Add to 'nodes[]'.
+                #log.debug('found in node: %s', NodeObject.get(d.node_id).name)
+
+        # find children (subClassOf) of 'node'. Add to 'nodes[]'.
         # for s, p, o...: s subclass of o
         subnode_uris = []
         for s, p, o in ontology:
-            if unicode_value('#subClassOf') in unicode_value(p) and unicode_value(node.URI) == unicode_value(o):
+            #log.debug('check in subtree %s, %s, %s', s, unicode_value(p), o)
+            node_uri_name = node.URI+"#"+node.name
+            #log.debug('uri name of node: %r, o: %r', node_uri_name, unicode_value(o))
+            #if unicode_value('#subClassOf') in unicode_value(p) and unicode_value(node.URI) == unicode_value(o):
+            if unicode_value('#subClassOf') in unicode_value(p) and unicode_value(node_uri_name) in unicode_value(o):
                 subnode_uris.append(unicode_value(s))
 
+        #log.debug('subnode_uris before is: %s', subnode_uris)
         for n in NodeObject.get_all():
-            string = unicode_value(n.URI)
-            if string in subnode_uris:
-                nodes.append(n)
+            string = unicode_value(n.URI+"#"+n.name)
+            #log.debug('n.URI: %r', string)
+            #if string in subnode_uris:
+            for s_uri in subnode_uris:
+                if string in unicode_value(s_uri):
+                    nodes.append(n)
+                    # there is only one node object for each node in the ontology??
+                    break
 
     return datasets
 
@@ -168,38 +180,45 @@ def search_from_node(context, data_dict):
 
 @toolkit.side_effect_free
 def semantic_search(context, data_dict=None):
+
+    """
+        Semantic search for a list of terms
+        The terms are either separated by "*" or by " "
+        "*" for AND relation
+        " " for OR relation
+    """
+
     datasets = []
 
     if 'term' not in data_dict:
         return None
 
-    terms = data_dict['term'].split(' ')
+    s_term = data_dict['term']
 
-    # 'datasets' holds all the datasets to be returned
-    datasets = []
-    #'origin' holds all the nodes matching the search term
-    origin = []
-    # Find nodes with names containing the search term
-    for term in terms:
-        found = _find_nodes_from_term(term)
-        for f in found:
-            if f.id not in origin:
-                origin.append(f.id)
+    # handle the terms with OR relation (separated by space)
+    log.debug('The search term is %s', s_term)
+    if ' ' in s_term:
+        log.debug('This is OR relation: %s', s_term)
+        datasets = _search_for_OR_relation(s_term)
+    else:
+        if '*' in s_term:
+            log.debug('This is AND relation: %s', s_term)
+            datasets = _search_for_AND_relation(s_term)
+        else:
+            log.debug('This is a single term: %s', s_term)
+            datasets = _search_for_OR_relation(s_term)
 
-    for node in origin:
-        found = _search_from_node(node)
-        for f in found:
-            if f not in datasets:
-                datasets.append(f)
+
+
 
     # write the results (datasets) to the SemanticSearchResults Table
-    _create_semantic_search_result_object(datasets, data_dict['term'])
+    _create_semantic_search_result_object(datasets, s_term)
 
     return datasets
 
     # Find datasets belonging the each node and their subtrees. Avoid duplicates!!!
 
-    return datasets
+    #return datasets
 
 def _get_ontology_graph(id):
     import ckanext.ontology.plugin as p
@@ -260,5 +279,93 @@ def _create_semantic_search_result_object(datasets, terms):
     result.results = results_str
     log.debug('The semanticSearchResultObject is: %s', result.__str__())
     result.save()
-    log.debug('SemanticSearchResult object is added to the table' )
     return result
+
+def _search_for_OR_relation(s_term):
+    # semantic search for terms with OR relations
+    terms = s_term.split(' ')
+    log.debug('The terms are: %s', ','.join(terms))
+
+    # 'datasets' holds all the datasets to be returned
+    datasets = []
+    #'origin' holds all the nodes matching the search term
+    origin = []
+    # Find nodes with names containing the search term
+    for term in terms:
+        found = _find_nodes_from_term(term)
+        for f in found:
+            if f.id not in origin:
+                origin.append(f.id)
+
+    for node in origin:
+        found = _search_from_node(node)
+        log.debug('result datasets: %r', found)
+        for f in found:
+            if not datasets:  # empty datasets means f is the first dataset
+                datasets.append(f)
+            else:
+                # avoid duplicated datasets
+                new_dataset = True
+                for d in datasets:
+                    if f['id']==d['id']:
+                        new_dataset = False
+                        # add the new matching node (term)
+                        d['found_in_node']['name'] = d['found_in_node'].get('name')+':'+f['found_in_node'].get('name')
+                        break
+                if new_dataset:
+                    datasets.append(f)
+
+    return datasets
+
+
+def _search_for_AND_relation(s_term):
+    #semantic search for teresm with AND relations
+    terms = s_term.split('*')
+    log.debug('The terms are: %s', ','.join(terms))
+
+    # 'new_results' holds all the datasets to be returned
+    new_results = []
+    # 'results' holds the temporary results for the terms inspected
+    results = []
+    for term in terms:
+        # 'datasets' holds the datasets for this term
+        datasets = []
+        #'origin' holds all the nodes matching the search term
+        origin = []
+        # Find nodes with names containing the search term
+        found = _find_nodes_from_term(term)
+        for f in found:
+            if f.id not in origin:
+                origin.append(f.id)
+
+        for node in origin:
+            found = _search_from_node(node)
+            for f in found:
+                new_dataset = True
+                for d in datasets:
+                    if f['id'] == d['id']:
+                        new_dataset = False
+                        break
+
+                if new_dataset:
+                    datasets.append(f)
+
+        if not datasets: # test if datasets is empty
+            # No datasets for one term, the results will be empty
+            return []
+        # keep only the datasets that appear in both terms
+        if not new_results: # This is the first AND term
+            results = list(datasets)
+            new_results = list (datasets)
+        else:
+            # keep datasets that appear in both sets (only identified by 'id' as 'found_in_node' may be different even for the same dataset )
+            new_results = []
+            for rd in results:
+                for d in datasets:
+                    if d['id'] == rd['id']:
+                        rd['found_in_node']['name'] = rd['found_in_node'].get('name')+'*'+d['found_in_node'].get('name')
+                        new_results.append(rd)
+                        break
+            results = list(new_results)
+
+    return new_results
