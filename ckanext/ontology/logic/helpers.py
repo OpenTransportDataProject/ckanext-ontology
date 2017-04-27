@@ -6,10 +6,10 @@ import ckan.plugins as p
 
 from ckanext.ontology.plugin import DATASET_TYPE_NAME
 
-def package_list_for_ontology(source_id):
+def package_list_for_ontology(ont_id):
     '''
-    Creates a dataset list with the ones belonging to a particular harvest
-    source.
+    Creates a dataset list for all available ontologies.
+    (search the relation table to get datasets for the ontology)
     It calls the package_list snippet and the pager.
     '''
 

@@ -80,6 +80,7 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
     ## IActions
     def get_actions(self):
         from ckanext.ontology.logic import get as ontology_get
+        from ckanext.ontology.logic import action as ontology_action
         return {
             'list_ontologies': ontology_get.get_ontology_objects,
             'get_ontology': ontology_get.get_ontology,
@@ -89,7 +90,9 @@ class OntologyPlugin(plugins.SingletonPlugin, DefaultDatasetForm):
             'list_nodes': ontology_get.get_node_objects,
             'get_node': ontology_get.get_node,
             'search_from_node': ontology_get.search_from_node,
-            'semantic_search': ontology_get.semantic_search
+            'semantic_search': ontology_get.semantic_search,
+
+            'delete_ontology': ontology_action.ontology_delete
         }
 
     # IAuthFunctions

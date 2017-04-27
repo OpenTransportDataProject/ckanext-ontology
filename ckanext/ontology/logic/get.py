@@ -77,6 +77,8 @@ def get_ontology_json(context, data_dict=None):
     ontology = OntologyObject.get(key=data_dict['id'])
     return json.loads(ontology.json_ontology)
 
+# Return the list of nodes that a dataset annotated to (has relations to)
+# The dataset_id is specified in data_dict
 @toolkit.side_effect_free
 def dataset_node_relations(context, data_dict=None):
     if 'id' not in data_dict:
@@ -87,7 +89,26 @@ def dataset_node_relations(context, data_dict=None):
     for rel in dataset_relations:
         if rel.dataset_id == data_dict['id']:
             relation = rel.as_dict()
+            log.debug("The relation is %s", relation)
             node = NodeObject.get(key=rel.node_id, attr='id').as_dict()
+            log.debug("The node object is %s", node)
+            dict_list.append( {'id': rel.id, 'dataset_id': rel.dataset_id, 'ontology_id': rel.ontology_id,
+                               'node': node} )
+    return dict_list
+
+# Return the list of datasets that are annotated with a node object
+# The node_id is specified in data_dict
+@toolkit.side_effect_free
+def get_datasets_annotatedto_node(context, data_dict=None):
+    if 'id' not in data_dict:
+        return None
+
+    node_relations = DatasetOntologyRelation.get_all()
+    dict_list = []
+    for rel in node_relations:
+        if rel.node_id == data_dict['id']:
+            relation = rel.as_dict()
+            dataset = relation.get(key=rel.dataset_id, attr='id').as_dict()
             dict_list.append( {'id': rel.id, 'dataset_id': rel.dataset_id, 'ontology_id': rel.ontology_id,
                                'node': node} )
     return dict_list

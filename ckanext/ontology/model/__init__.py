@@ -74,6 +74,8 @@ class OntologyDomainObject(DomainObject):
     def get(cls, key, default=None, attr=None):
         """
             Finds a single entity in the register.
+            key:  record value
+            attr: column name
         """
 
         if attr == None:
@@ -92,15 +94,49 @@ class OntologyDomainObject(DomainObject):
 
     @classmethod
     def get_all(cls, key=None, attr=None):
+        """
+            Finds all selected entities in the register.
+            key:  record value
+            attr: column name
+        """
+
         query = Session.query(cls).autoflush(False)
+        if attr == None:
+            return query.all()
+        query = query.filter(getattr(cls, attr)==key)
         return query.all()
+
+    @classmethod
+    def delete(cls, key, default=None, attr=None):
+        """
+            Delete one selected entity in the register.
+        """
+        if attr == None:
+            attr = cls.key_attr
+        Session.query(cls).autoflush(False).filter(getattr(cls, attr)==key).delete(synchronize_session=False)
+        #Session.commit()
+        return
+
+
+
+    @classmethod
+    def delete_all(cls, key, default=None, attr=None):
+        """
+            Delete all selected entities in the register.
+        """
+        if attr == None:
+            Session.query(cls).autoflush(False).delete(synchronize_session=False)
+        else:
+            Session.query(cls).autoflush(False).filter(getattr(cls, attr)==key).delete(synchronize_session=False)
+
+        Session.commit()
+        return
 
 
 class OntologyObject(OntologyDomainObject):
     """
-        A Harvest Object is created every time an element is fetched from a
-        harvest source. Its contents can be processed and imported to ckan
-        packages, RDF graphs, etc.
+        An Ontology Object is created in the Ontology table when an ontology is added.
+        A CKAN package will be created and the nodes will be added to the Node table as well.
     """
 
     def as_dict(self):
