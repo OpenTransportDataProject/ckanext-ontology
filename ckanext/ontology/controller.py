@@ -119,10 +119,8 @@ class OntologyController(BaseController):
         }
         dataset = get_action('package_show')(context, {'id': id})
 
-        for r in DatasetOntologyRelation.get_all():
-            if r.dataset_id == dataset['id']:
-                r.delete()
-                r.commit()
+        #log.info('to delete all items with dataset_id %s', dataset['id'])
+        DatasetOntologyRelation.delete_all(key=dataset['id'], attr='dataset_id')
 
         relations = []
         ontology = None

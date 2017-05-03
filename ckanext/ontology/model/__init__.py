@@ -114,7 +114,7 @@ class OntologyDomainObject(DomainObject):
         if attr == None:
             attr = cls.key_attr
         Session.query(cls).autoflush(False).filter(getattr(cls, attr)==key).delete(synchronize_session=False)
-        #Session.commit()
+        Session.commit()
         return
 
 
